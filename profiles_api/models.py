@@ -101,17 +101,22 @@ class Course(models.Model):
     def __str__(self):
         """String"""
         return self.description
-# class Chapter(models.Model):
-#     name=models.CharField(max_length=100)
-#     description=models.CharField(max_length=100)
+class Chapter(models.Model):
+    name=models.CharField(max_length=100)
+    description=models.CharField(max_length=100)
+    course=models.ForeignKey(Course,on_delete=models.CASCADE)
+    position=models.IntegerField()
 
+    def __str__(self):
+        """String"""
+        return self.name
 
-# class ChapterInCourse(models.Model):
-#     courseid=models.ForeignKey(Course,on_delete=models.CASCADE)
-#     chapterid=models.ForeignKey(Chapter,on_delete=models.CASCADE)
-#     position=models.IntegerField()
-# class ConceptInChapter(models.Model):
-#     chapterid=models.ForeignKey(Chapter,on_delete=models.CASCADE)
-#     conceptid=models.ForeignKey(Concept,on_delete=models.CASCADE)
-#     position=models.IntegerField()
+    def __str__(self):
+        """String"""
+        return self.description
+
+class ConceptInChapter(models.Model):
+    chapterid=models.ForeignKey(Chapter,on_delete=models.CASCADE)
+    conceptid=models.ForeignKey(Concept,on_delete=models.CASCADE)
+    position=models.IntegerField()
 
