@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # Apps
     'profiles_api',
+    'contentmanager',
 ]
 
 MIDDLEWARE = [
