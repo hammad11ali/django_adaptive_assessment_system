@@ -5,6 +5,7 @@ from .models import Topic
 from .models import Concept
 
 
+
 class Area_View(APIView):
 
     def post(self, request, format=None):
@@ -68,9 +69,12 @@ class Topic_View(APIView):
         area_id = request.data['area_id']
         area = Area.objects.filter(id=area_id)[0]
         topic = Topic.objects.filter(name=name)
-        topic = Topic.objects.filter(
-            id=id).update(name=name, area=area)
-        return Response({'message': 'done'})
+        if topic.count() > 0:
+            return Response({'message': 'Invalid'})
+        else:
+            topic = Topic.objects.filter(
+                id=id).update(name=name, area=area)
+            return Response({'message': 'done'})
 
     def delete(self, request, format=None):
         id = request.query_params['id']
@@ -86,7 +90,6 @@ class Concept_View(APIView):
         area_id = request.data['area_id']
         topic_id = request.data['topic_id']
         File = request.data['file']
-        print(File)
         area = Area.objects.filter(id=area_id)[0]
         topic = Topic.objects.filter(id=topic_id)[0]
         concept = Concept.objects.filter(name=name)
@@ -103,15 +106,15 @@ class Concept_View(APIView):
             topic_id = request.query_params['topic_id']
             concepts = Concept.objects.filter(
                 area__id=area_id, topic__id=topic_id).values()
-            return Response({'Content': concepts})
+            return Response({'Concepts': concepts})
         elif 'area_id' in request.query_params.keys():
             area_id = request.query_params['area_id']
             concepts = Concept.objects.filter(area__id=area_id).values()
-            return Response({'Content': concepts})
+            return Response({'Concepts': concepts})
         elif 'topic_id' in request.query_params.keys():
             topic_id = request.query_params['topic_id']
             concepts = Concept.objects.filter(topic__id=topic_id).values()
-            return Response({'Content': concepts})
+            return Response({'Concepts': concepts})
         else:
             concepts = Concept.objects.values()
             return Response({'Content': concepts})
