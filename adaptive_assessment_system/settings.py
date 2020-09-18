@@ -60,6 +60,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'adaptive_assessment_system.urls'
 
+CORS_ORIGIN_ALLOW_ALL = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

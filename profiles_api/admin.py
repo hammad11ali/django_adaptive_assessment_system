@@ -6,7 +6,6 @@ from .models import Concept
 # Register your models here.
 
 admin.site.register(models.UserProfile)
-admin.site.register(Area)
-admin.site.register(Topic)
-admin.site.register(Concept)
-
+# admin.site.register(Area)
+# admin.site.register(Topic)
+# admin.site.register(Concept)
