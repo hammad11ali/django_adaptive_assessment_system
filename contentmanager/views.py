@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from .models import Area
 from .models import Topic
 from .models import Concept
-
-
+import os
+from importlib import import_module
 
 class Area_View(APIView):
 
@@ -106,15 +106,28 @@ class Concept_View(APIView):
             topic_id = request.query_params['topic_id']
             concepts = Concept.objects.filter(
                 area__id=area_id, topic__id=topic_id).values()
-            return Response({'Concepts': concepts})
+            return Response({'Content': concepts})
         elif 'area_id' in request.query_params.keys():
             area_id = request.query_params['area_id']
             concepts = Concept.objects.filter(area__id=area_id).values()
-            return Response({'Concepts': concepts})
+            return Response({'Content': concepts})
         elif 'topic_id' in request.query_params.keys():
             topic_id = request.query_params['topic_id']
             concepts = Concept.objects.filter(topic__id=topic_id).values()
-            return Response({'Concepts': concepts})
+            return Response({'Content': concepts})
+        elif 'concept_id'in request.query_params.keys():
+            concept_id=request.query_params['concept_id']
+            concept=Concept.objects.filter(id=concept_id)[0]
+            return Response({'Content': concept})
+        elif 'ids'in request.query_params.keys():
+            ids= request.query_params['ids']
+            ids=ids.split(",")[:-1]
+            concepts=[]
+            for i in ids:
+                c=Concept.objects.filter(id=i).values()[0]
+                concepts.append(c)
+            print(concepts)
+            return Response({'Content': concepts})
         else:
             concepts = Concept.objects.values()
             return Response({'Content': concepts})
@@ -213,3 +226,43 @@ class Chapter_View(APIView):
         a = Chapter.objects.get(id=id)
         a.delete()
         return Response({'message': 'done'})
+
+class Quiz_View(APIView):
+    def generate(self,concept_id):
+        concept = Concept.objects.filter(id=concept_id).values()[0]
+        file_=os.path.basename(concept['qgenerator'])
+        filename= os.path.splitext(file_)[0]
+        modulename = '..'+filename
+        QGenerator = import_module(modulename,package='contentmanager.media.Qgenerators.')
+        Questions = []
+        instance = QGenerator.getInstance()
+        for i in range(0, 10):
+            # Call Generate Question function
+            statement, optionsArray, correct = instance.generateQuestions()
+            options = []
+            for j in range(0, 4):
+                isAnswer = False
+                if j == correct:
+                    isAnswer = True
+                option = {'id': j, 'name': optionsArray[j],
+                        'isAnswer': isAnswer, 'isSelected': False}
+                options.append(option)
+            Question = {'id': i, 'name': statement, 'options': options, 'concepts_id':concept_id}
+            Questions.append(Question)
+        return Questions
+    def get(self, request, format=None):
+        Content=[]
+        if 'id' in request.query_params.keys():
+            concept_id = request.query_params['id']
+            Content=self.generate(concept_id)
+        elif "ids" in request.query_params.keys():
+            ids= request.query_params['ids']
+            ids=ids.split(",")[:-1]
+            allQuestions=[]
+            for concept_id in ids:
+                concept_id=int(concept_id)
+                questions=self.generate(concept_id)
+                allQuestions.extend(questions)
+            Content=allQuestions
+
+        return Response({'Content': Content})
