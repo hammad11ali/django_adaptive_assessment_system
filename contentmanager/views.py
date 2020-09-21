@@ -120,8 +120,12 @@ class Concept_View(APIView):
             concept=Concept.objects.filter(id=concept_id)[0]
             return Response({'Content': concept})
         elif 'ids'in request.query_params.keys():
+            print(request.query_params['ids'])
             ids= request.query_params['ids']
+            for id in ids:
+                print(id)
             ids=ids.split(",")[:-1]
+            print(ids)
             concepts=[]
             for i in ids:
                 c=Concept.objects.filter(id=i).values()[0]
