@@ -5,6 +5,8 @@ from .models import Topic
 from .models import Concept
 import os
 from importlib import import_module
+from django.forms.models import model_to_dict
+
 
 class Area_View(APIView):
 
@@ -60,8 +62,15 @@ class Topic_View(APIView):
             area_id = request.query_params['id']
             topics = Topic.objects.filter(area__id=area_id).values()
         else:
-            topics = Topic.objects.values()
-        return Response({'Content': topics})
+            topics = Topic.objects.all()
+            contents = []
+            for topic in topics:
+                t = model_to_dict(topic)
+                t['area_name'] = topic.area.name
+                print(t)
+                contents.append(t)
+
+        return Response({'Content': contents})
 
     def put(self, request, format=None):
         name = request.data['name']
@@ -116,19 +125,19 @@ class Concept_View(APIView):
             concepts = Concept.objects.filter(topic__id=topic_id).values()
             return Response({'Content': concepts})
         elif 'concept_id'in request.query_params.keys():
-            concept_id=request.query_params['concept_id']
-            concept=Concept.objects.filter(id=concept_id)[0]
+            concept_id = request.query_params['concept_id']
+            concept = Concept.objects.filter(id=concept_id)[0]
             return Response({'Content': concept})
         elif 'ids'in request.query_params.keys():
             print(request.query_params['ids'])
-            ids= request.query_params['ids']
+            ids = request.query_params['ids']
             for id in ids:
                 print(id)
-            ids=ids.split(",")[:-1]
+            ids = ids.split(",")[:-1]
             print(ids)
-            concepts=[]
+            concepts = []
             for i in ids:
-                c=Concept.objects.filter(id=i).values()[0]
+                c = Concept.objects.filter(id=i).values()[0]
                 concepts.append(c)
             print(concepts)
             return Response({'Content': concepts})
@@ -231,13 +240,15 @@ class Chapter_View(APIView):
         a.delete()
         return Response({'message': 'done'})
 
+
 class Quiz_View(APIView):
-    def generate(self,concept_id):
+    def generate(self, concept_id):
         concept = Concept.objects.filter(id=concept_id).values()[0]
-        file_=os.path.basename(concept['qgenerator'])
-        filename= os.path.splitext(file_)[0]
+        file_ = os.path.basename(concept['qgenerator'])
+        filename = os.path.splitext(file_)[0]
         modulename = '..'+filename
-        QGenerator = import_module(modulename,package='contentmanager.media.Qgenerators.')
+        QGenerator = import_module(
+            modulename, package='contentmanager.media.Qgenerators.')
         Questions = []
         instance = QGenerator.getInstance()
         for i in range(0, 10):
@@ -249,24 +260,26 @@ class Quiz_View(APIView):
                 if j == correct:
                     isAnswer = True
                 option = {'id': j, 'name': optionsArray[j],
-                        'isAnswer': isAnswer, 'isSelected': False}
+                          'isAnswer': isAnswer, 'isSelected': False}
                 options.append(option)
-            Question = {'id': i, 'name': statement, 'options': options, 'concepts_id':concept_id}
+            Question = {'id': i, 'name': statement,
+                        'options': options, 'concepts_id': concept_id}
             Questions.append(Question)
         return Questions
+
     def get(self, request, format=None):
-        Content=[]
+        Content = []
         if 'id' in request.query_params.keys():
             concept_id = request.query_params['id']
-            Content=self.generate(concept_id)
+            Content = self.generate(concept_id)
         elif "ids" in request.query_params.keys():
-            ids= request.query_params['ids']
-            ids=ids.split(",")[:-1]
-            allQuestions=[]
+            ids = request.query_params['ids']
+            ids = ids.split(",")[:-1]
+            allQuestions = []
             for concept_id in ids:
-                concept_id=int(concept_id)
-                questions=self.generate(concept_id)
+                concept_id = int(concept_id)
+                questions = self.generate(concept_id)
                 allQuestions.extend(questions)
-            Content=allQuestions
+            Content = allQuestions
 
         return Response({'Content': Content})
