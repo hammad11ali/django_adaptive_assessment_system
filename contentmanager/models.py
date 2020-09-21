@@ -43,22 +43,13 @@ class Course(models.Model):
     def __str__(self):
         """String"""
         return self.description
-class Chapter(models.Model):
-    name=models.CharField(max_length=100)
-    description=models.CharField(max_length=100)
+class ConceptInCourse(models.Model):
+    concept=models.ForeignKey(Concept,on_delete=models.CASCADE)
     course=models.ForeignKey(Course,on_delete=models.CASCADE)
-    position=models.IntegerField()
-
-    def __str__(self):
-        """String"""
-        return self.name
-
-    def __str__(self):
-        """String"""
-        return self.description
-
-class ConceptInChapter(models.Model):
-    chapterid=models.ForeignKey(Chapter,on_delete=models.CASCADE)
-    conceptid=models.ForeignKey(Concept,on_delete=models.CASCADE)
-    position=models.IntegerField()
+class Assessment(models.Model):
+    name=models.CharField(max_length=100)
+    totalQuestions=models.IntegerField()
+class ConceptInAssessment(models.Model):
+    concept=models.ForeignKey(Concept,on_delete=models.CASCADE)
+    assessment=models.ForeignKey(Assessment,on_delete=models.CASCADE)
 
