@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import Area
 from .models import Topic
 from .models import Concept
+from .models import Chapter
 import os
 from importlib import import_module
 from django.forms.models import model_to_dict
@@ -139,11 +140,19 @@ class Concept_View(APIView):
             for i in ids:
                 c = Concept.objects.filter(id=i).values()[0]
                 concepts.append(c)
-            print(concepts)
+                # add area_name and add Topic_name
             return Response({'Content': concepts})
         else:
-            concepts = Concept.objects.values()
-            return Response({'Content': concepts})
+            concepts = Concept.objects.all()
+            contents = []
+            for concept in concepts:
+                t = model_to_dict(concept)
+                t['area_name'] = concept.area.name
+                t['topic_name']=concept.topic.name
+                print(t)
+                contents.append(t)
+            print(concepts)
+            return Response({'Content': contents})
 
     def put(self, request, format=None):
         name = request.data['name']
@@ -221,8 +230,15 @@ class Chapter_View(APIView):
             course_id = request.query_params['id']
             chapters = Chapter.objects.filter(course__id=course_id).values()
         else:
-            chapters = Chapter.objects.values()
-        return Response({'Chapter': chapters})
+            chapters = Chapter.objects.all()
+            contents = []
+            for chapter in chapters:
+                t = model_to_dict(chapter)
+                t['area_name'] = chapter.course.name
+                print(t)
+                contents.append(t)
+            print(contents)
+        return Response({'Chapter': contents})
 
     def put(self, request, format=None):
         name = request.data['name']
