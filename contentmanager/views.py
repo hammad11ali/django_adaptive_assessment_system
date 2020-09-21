@@ -59,12 +59,12 @@ class Topic_View(APIView):
             return Response({'message': 'done'})
 
     def get(self, request, format=None):
+        contents = []
         if 'id' in request.query_params.keys():
             area_id = request.query_params['id']
-            topics = Topic.objects.filter(area__id=area_id).values()
+            contents = Topic.objects.filter(area__id=area_id).values()
         else:
             topics = Topic.objects.all()
-            contents = []
             for topic in topics:
                 t = model_to_dict(topic)
                 t['area_name'] = topic.area.name
