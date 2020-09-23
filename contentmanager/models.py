@@ -22,7 +22,6 @@ class Topic(models.Model):
 
 class Concept(models.Model):
     name = models.CharField(max_length=100)
-    area = models.ForeignKey(Area, on_delete=models.CASCADE)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     qgenerator = models.FileField(upload_to='Qgenerators/', null=True)
 
@@ -49,6 +48,7 @@ class ConceptInCourse(models.Model):
 class Assessment(models.Model):
     name=models.CharField(max_length=100)
     totalQuestions=models.IntegerField()
+    course=models.ForeignKey(Course,on_delete=models.CASCADE, default=1)
 class ConceptInAssessment(models.Model):
     concept=models.ForeignKey(Concept,on_delete=models.CASCADE)
     assessment=models.ForeignKey(Assessment,on_delete=models.CASCADE)

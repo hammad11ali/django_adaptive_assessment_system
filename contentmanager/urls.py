@@ -5,5 +5,8 @@ urlpatterns = [
     path('topics/', Topic_View.as_view()),
     path('areas/', Area_View.as_view()),
     path('quiz/', Quiz_View.as_view()),
-    path('course/',Course_View.as_view())
+    path('courses/',Course_View.as_view()),
+    path("conceptincourse/",ConceptInCourse_View.as_view()),
+    path('assessments/',Assessment_View.as_view()),
+    path('conceptinassessment/',ConceptInAssessment.as_view())
 ]
