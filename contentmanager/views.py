@@ -260,19 +260,18 @@ class Quiz_View(APIView):
                         'options': options, 'concepts_id': concept_id}
             Questions.append(Question)
         return Questions
-    def geerateCourseQuiz(self,course_id):
+
+    def geerateCourseQuiz(self, course_id):
         concepts = ConceptInCourse.objects.filter(course__id=course_id)
-        print(concepts)
         Questions = []
-        for concept in concepts:
-            c=Concept.objects.filter(id=concept.id)[0]
-            file_ = os.path.basename(c['qgenerator'])
+        for cic in concepts:
+            c = cic.concept
+            file_ = os.path.basename(c.qgenerator.name)
             filename = os.path.splitext(file_)[0]
             modulename = '..'+filename
             QGenerator = import_module(
-                modulename, package='contentmanager.media.Qgenerators.')   
+                modulename, package='contentmanager.media.Qgenerators.')
             instance = QGenerator.getInstance()
-            print("jdbjbd")
             for i in range(0, 4):
                 # Call Generate Question function
                 statement, optionsArray, correct = instance.generateQuestions()
@@ -282,13 +281,14 @@ class Quiz_View(APIView):
                     if j == correct:
                         isAnswer = True
                     option = {'id': j, 'name': optionsArray[j],
-                            'isAnswer': isAnswer, 'isSelected': False}
+                              'isAnswer': isAnswer, 'isSelected': False}
                     options.append(option)
                 Question = {'id': i, 'name': statement,
-                            'options': options, 'concepts_id': concept_id}
-                Questions.append(Question) 
-            
+                            'options': options, 'concepts_id': c.id}
+                Questions.append(Question)
+
         return Questions
+
     def get(self, request, format=None):
         Content = []
         if 'id' in request.query_params.keys():
@@ -304,9 +304,11 @@ class Quiz_View(APIView):
                 allQuestions.extend(questions)
             Content = allQuestions
         elif 'course_id' in request.query_params.keys():
-            course_id=request.query_params['course_id']
+            course_id = request.query_params['course_id']
             Content = self.geerateCourseQuiz(course_id)
         return Response({'Content': Content})
+
+
 class Assessment_View(APIView):
 
     def post(self, request, format=None):
@@ -384,7 +386,8 @@ class ConceptInAssessment_View(APIView):
         print(assessment)
         concepts_ids = request.data['ids']
         print(concepts_ids)
-        ConceptInAssessment.objects.filter(assessment__id=assessment_id).delete()
+        ConceptInAssessment.objects.filter(
+            assessment__id=assessment_id).delete()
         for concept_id in concepts_ids:
             concept = Concept.objects.filter(id=concept_id)[0]
             ConceptInAssessment.objects.create(
