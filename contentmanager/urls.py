@@ -8,5 +8,5 @@ urlpatterns = [
     path('courses/',Course_View.as_view()),
     path("conceptincourse/",ConceptInCourse_View.as_view()),
     path('assessments/',Assessment_View.as_view()),
-    path('conceptinassessment/',ConceptInAssessment.as_view())
+    path('conceptinassessment/',ConceptInAssessment_View.as_view())
 ]

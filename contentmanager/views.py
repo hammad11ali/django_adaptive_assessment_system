@@ -151,7 +151,7 @@ class Concept_View(APIView):
                 t = model_to_dict(concept)
                 t['filename'] = concept.qgenerator.name
                 t['topic_name'] = concept.topic.name
-                t['selected']=False
+                t['selected'] = False
                 contents.append(t)
             return Response({'Content': contents})
 
@@ -188,22 +188,23 @@ class Course_View(APIView):
     def post(self, request, format=None):
         name = request.data['name']
         description = request.data['description']
-        Image=request.data['thumbnail']
-        concepts_id=request.data['ids']
-        course=Course.objects.create(name=name, description=description,thumbnail=Image)
-        if not concepts_id=='':
-            concepts_id=concepts_id.split(',')
+        Image = request.data['thumbnail']
+        concepts_id = request.data['ids']
+        course = Course.objects.create(
+            name=name, description=description, thumbnail=Image)
+        if not concepts_id == '':
+            concepts_id = concepts_id.split(',')
             print(concepts_id)
             for concept_id in concepts_id:
-                concept=Concept.objects.filter(id=concept_id)[0]
-                ConceptInCourse.objects.create(concept=concept,course=course) 
-               
+                concept = Concept.objects.filter(id=concept_id)[0]
+                ConceptInCourse.objects.create(concept=concept, course=course)
+
         return Response({'message': 'Done'})
 
     def get(self, request, format=None):
         if 'id' in request.query_params.keys():
             course_id = request.query_params['id']
-            course = Course.objects.filter(id=area_id).values()
+            course = Course.objects.filter(id=course_id).values()[0]
         else:
             course = Course.objects.values()
         return Response({'Content': course})
@@ -212,12 +213,19 @@ class Course_View(APIView):
         name = request.data['name']
         id = request.data['id']
         description = request.data['description']
-        thumbnail=request.data['thumbnail']
-        concepts_id=request.data['concepts']
-        course = Course.objects.filter(id=id).update(name=name,description=description,thumbnail=thumbnail)
+        thumbnail = request.data['thumbnail']
+        course = Course.objects.filter(id=id)[0]
+        if thumbnail == 'null':
+            thumbnail = course.thumbnail
+        concepts_id = request.data['ids']
+        concepts_id = concepts_id.split(',')
+        course.delete()
+        course = Course.objects.create(
+            name=name, description=description, thumbnail=thumbnail)
         for concept_id in concepts_id:
-            concept=Concept.objects.filter(id=concept_id)[0]
-            ConceptInCourse.objects.create(concept=concept,course=course) 
+            concept = Concept.objects.filter(id=concept_id)[0]
+            ConceptInCourse.objects.create(concept=concept, course=course)
+
         return Response({'message': 'done'})
 
     def delete(self, request, format=None):
@@ -225,6 +233,7 @@ class Course_View(APIView):
         a = Course.objects.get(id=id)
         a.delete()
         return Response({'message': 'done'})
+
 
 class Quiz_View(APIView):
     def generate(self, concept_id):
@@ -268,19 +277,23 @@ class Quiz_View(APIView):
             Content = allQuestions
 
         return Response({'Content': Content})
+
+
 class Assessment_View(APIView):
 
     def post(self, request, format=None):
         name = request.data['name']
-        totalQuestions=request.data['totalQuestions']
-        course_id=request.data["course_id"]
-        course=Course.objects.filter(id=course_id)[0]
-        assessment=Assessment.objects.create(name=name,totalQuestions=totalQuestions,course=course)
+        totalQuestions = request.data['totalQuestions']
+        course_id = request.data["course_id"]
+        course = Course.objects.filter(id=course_id)[0]
+        assessment = Assessment.objects.create(
+            name=name, totalQuestions=totalQuestions, course=course)
         return Response({'message': 'Done'})
+
     def get(self, request, format=None):
-        contents=[]
-        course_id=request.query_params["course_id"]
-        course=Course.objects.filter(id=course_id)[0]
+        contents = []
+        course_id = request.query_params["course_id"]
+        course = Course.objects.filter(id=course_id)[0]
         assessments = Assessment.objects.filter(course_id=course_id)
         for assessment in assessments:
             t = model_to_dict(assessment)
@@ -288,59 +301,92 @@ class Assessment_View(APIView):
             print(t)
             contents.append(t)
         return Response({'Content': contents})
+
     def put(self, request, format=None):
         name = request.data['name']
-        id=request.data['id']
-        totalQuestions=request.data['totalQuestions']
-        course_id=request.data['course_id']
-        course=Course.objects.filter(id=course_id)[0]
-        Assessment.objects.filter(id=id).update(name=name,totalQuestions=totalQuestions,course=course)
+        id = request.data['id']
+        totalQuestions = request.data['totalQuestions']
+        course_id = request.data['course_id']
+        course = Course.objects.filter(id=course_id)[0]
+        Assessment.objects.filter(id=id).update(
+            name=name, totalQuestions=totalQuestions, course=course)
         return Response({'message': 'done'})
+
     def delete(self, request, format=None):
         id = request.query_params['id']
         a = Assessment.objects.get(id=id)
         a.delete()
         return Response({'message': 'done'})
+
+
 class ConceptInCourse_View(APIView):
     def get(self, request, format=None):
-        contents=[]
+        contents = []
         if 'id' in request.query_params.keys():
-            course_id=request.query_params['id']
-            conceptsincourses=ConceptInCourse.objects.filter(course__id=course_id)
-            concepts=Concept.objects.values()
+            course_id = request.query_params['id']
+            concepts = Concept.objects.all()
             for concept in concepts:
-                for conceptincourse in conceptsincourses:
-                    if conceptincourse.id==concept.id:
-                        t = model_to_dict(concept)
-                        t['selected'] = True
-                        contents.append(t)
-                    else:
-                        t = model_to_dict(concept)
-                        t['selected'] = False
-                        contents.append(t)
+                content = model_to_dict(concept)
+                content.pop("qgenerator")
+                conceptsincourse = ConceptInCourse.objects.filter(
+                    course__id=course_id, concept__id=concept.id)
+                if conceptsincourse.count() > 0:
+                    content['selected'] = True
+                else:
+                    content['selected'] = False
+                contents.append(content)
         else:
             concepts = Concept.objects.all()
             for concept in concepts:
                 # t = model_to_dict(concept)
-                t=dict()
-                t['id']=concept.id
-                t['name']=concept.name
-                t['topic']=concept.topic.id
+                t = dict()
+                t['id'] = concept.id
+                t['name'] = concept.name
+                t['topic'] = concept.topic.id
                 t['selected'] = False
                 contents.append(t)
 
-        return Response ({"Content":contents})
-class ConceptInAssessment(APIView):
+        return Response({"Content": contents})
+
+
+class ConceptInAssessment_View(APIView):
     def post(self, request, format=None):
-        assessment_id=request.data['id']
-        assessment=Assessment.objects.filter(id=assessment_id)[0]
+        assessment_id = request.data['id']
+        assessment = Assessment.objects.filter(id=assessment_id)[0]
         print(assessment)
-        concepts_ids=request.data['ids']
-        if not concepts_ids=='':
-            for concept_id in concepts_ids:
-                concept=Concept.objects.filter(id=concept_id)[0]
-                ConceptInCourse.objects.create(concept=concept,assessment=assessment) 
-        return Response({'message':'done'})
+        concepts_ids = request.data['ids']
+        print(concepts_ids)
+        ConceptInAssessment.objects.filter(assessment__id=assessment_id).delete()
+        for concept_id in concepts_ids:
+            concept = Concept.objects.filter(id=concept_id)[0]
+            ConceptInAssessment.objects.create(
+                concept=concept, assessment=assessment)
+        return Response({'message': 'done'})
 
-
-
+    def get(self, request, format=None):
+        contents = []
+        if 'id' in request.query_params.keys():
+            assessment_id = request.query_params['id']
+            print(assessment_id)
+            concepts = Concept.objects.all()
+            for concept in concepts:
+                content = model_to_dict(concept)
+                content.pop("qgenerator")
+                conceptsincourse = ConceptInAssessment.objects.filter(
+                    assessment__id=assessment_id, concept__id=concept.id)
+                if conceptsincourse.count() > 0:
+                    content['selected'] = True
+                else:
+                    content['selected'] = False
+                contents.append(content)
+        else:
+            concepts = Concept.objects.all()
+            for concept in concepts:
+                # t = model_to_dict(concept)
+                t = dict()
+                t['id'] = concept.id
+                t['name'] = concept.name
+                t['topic'] = concept.topic.id
+                t['selected'] = False
+                contents.append(t)
+        return Response({"Content": contents})
