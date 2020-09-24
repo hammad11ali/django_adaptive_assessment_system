@@ -260,7 +260,35 @@ class Quiz_View(APIView):
                         'options': options, 'concepts_id': concept_id}
             Questions.append(Question)
         return Questions
-
+    def geerateCourseQuiz(self,course_id):
+        concepts = ConceptInCourse.objects.filter(course__id=course_id)
+        print(concepts)
+        Questions = []
+        for concept in concepts:
+            c=Concept.objects.filter(id=concept.id)[0]
+            file_ = os.path.basename(c['qgenerator'])
+            filename = os.path.splitext(file_)[0]
+            modulename = '..'+filename
+            QGenerator = import_module(
+                modulename, package='contentmanager.media.Qgenerators.')   
+            instance = QGenerator.getInstance()
+            print("jdbjbd")
+            for i in range(0, 4):
+                # Call Generate Question function
+                statement, optionsArray, correct = instance.generateQuestions()
+                options = []
+                for j in range(0, 4):
+                    isAnswer = False
+                    if j == correct:
+                        isAnswer = True
+                    option = {'id': j, 'name': optionsArray[j],
+                            'isAnswer': isAnswer, 'isSelected': False}
+                    options.append(option)
+                Question = {'id': i, 'name': statement,
+                            'options': options, 'concepts_id': concept_id}
+                Questions.append(Question) 
+            
+        return Questions
     def get(self, request, format=None):
         Content = []
         if 'id' in request.query_params.keys():
@@ -275,10 +303,10 @@ class Quiz_View(APIView):
                 questions = self.generate(concept_id)
                 allQuestions.extend(questions)
             Content = allQuestions
-
+        elif 'course_id' in request.query_params.keys():
+            course_id=request.query_params['course_id']
+            Content = self.geerateCourseQuiz(course_id)
         return Response({'Content': Content})
-
-
 class Assessment_View(APIView):
 
     def post(self, request, format=None):
