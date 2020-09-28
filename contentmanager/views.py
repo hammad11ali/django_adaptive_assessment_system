@@ -292,8 +292,9 @@ class Quiz_View(APIView):
                 Questions.append(Question)
 
         return Questions
-    def generateAssessmentQuiz(self, assessment_id):
-        concepts = ConceptInAssessment.objects.filter(assessment__id=assessment_id)
+    def generateAssessmentQuiz(self, aid):
+        concepts = ConceptInAssessment.objects.filter(assessment__id=aid)
+        print(concepts)
         Questions = []
         for cic in concepts:
             c = cic.concept
@@ -338,7 +339,7 @@ class Quiz_View(APIView):
             course_id = request.query_params['course_id']
             Content = self.geerateCourseQuiz(course_id)
         elif 'assessment_id' in request.query_params.keys():
-            assessment_id = request.query_params['assessement_id']
+            assessment_id = request.query_params['assessment_id']
             Content = self.generateAssessmentQuiz(assessment_id)
 
         print(Content)
