@@ -10,6 +10,7 @@ from .models import ConceptInCourse
 from .models import AssessmentEnrollment
 from .models import AsssessmentPerformance
 from .models import CourseEnrollment
+from profiles_api.models import UserProfile
 import os
 from importlib import import_module
 from django.forms.models import model_to_dict
@@ -291,7 +292,34 @@ class Quiz_View(APIView):
                 Questions.append(Question)
 
         return Questions
+    def generateAssessmentQuiz(self, assessment_id):
+        concepts = ConceptInAssessment.objects.filter(assessment__id=assessment_id)
+        Questions = []
+        for cic in concepts:
+            c = cic.concept
+            file_ = os.path.basename(c.qgenerator.name)
+            filename = os.path.splitext(file_)[0]
+            modulename = '..'+filename
+            QGenerator = import_module(
+                modulename, package='contentmanager.media.Qgenerators.')
+            instance = QGenerator.getInstance()
+            for i in range(0, 4):
+                # Call Generate Question function
+                statement, optionsArray, correct = instance.generateQuestions()
+                options = []
+                for j in range(0, 4):
+                    isAnswer = False
+                    if j == correct:
+                        isAnswer = True
+                    option = {'id': j, 'name': optionsArray[j],
+                              'isAnswer': isAnswer, 'isSelected': False}
+                    options.append(option)
+                Question = {'id': i, 'name': statement,
+                            'options': options, 'concepts_id': c.id}
+                Questions.append(Question)
+                print(Questions)
 
+        return Questions
     def get(self, request, format=None):
         Content = []
         if 'id' in request.query_params.keys():
@@ -309,6 +337,10 @@ class Quiz_View(APIView):
         elif 'course_id' in request.query_params.keys():
             course_id = request.query_params['course_id']
             Content = self.geerateCourseQuiz(course_id)
+        elif 'assessment_id' in request.query_params.keys():
+            assessment_id = request.query_params['assessement_id']
+            Content = self.generateAssessmentQuiz(assessment_id)
+
         print(Content)
         return Response({'Content': Content})
 
@@ -379,6 +411,21 @@ class ConceptInCourse_View(APIView):
                 t['topic'] = concept.topic.id
                 t['selected'] = False
                 contents.append(t)
+
+        return Response({"Content": contents})
+
+class CourseInAssessment(APIView):
+     def get(self, request, format=None):
+        contents = []
+        if 'id' in request.query_params.keys():
+            assessment_id = request.query_params['id']
+            concepts = Concept.objects.all()
+            for concept in concepts:
+                content = model_to_dict(concept)
+                content.pop("qgenerator")
+                conceptsinassessment = ConceptInAssessment.objects.filter(
+                    assessment__id=assessment_id, concept__id=concept.id)
+
 
         return Response({"Content": contents})
 
@@ -491,3 +538,12 @@ class AssessmentEnroll_View(APIView):
         a = Topic.objects.get(id=id)
         a.delete()
         return Response({'message': 'done'})
+
+
+class CourseEnrollment_View(APIView):
+    def post(self,request,format=None):
+        print("dhagjdag")
+        course_id=request.data['course_id']
+        user=UserProfile.objects.filter(id=1)[0]
+        course=Course.objects.filter(id=course_id)[0]
+        CourseEnrollment.objects.create(user=user,course=course)
