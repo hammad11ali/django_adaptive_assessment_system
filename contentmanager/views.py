@@ -7,6 +7,9 @@ from .models import Course
 from .models import Assessment
 from .models import ConceptInAssessment
 from .models import ConceptInCourse
+from .models import AssessmentEnrollment
+from .models import AsssessmentPerformance
+from .models import CourseEnrollment
 import os
 from importlib import import_module
 from django.forms.models import model_to_dict
@@ -306,6 +309,7 @@ class Quiz_View(APIView):
         elif 'course_id' in request.query_params.keys():
             course_id = request.query_params['course_id']
             Content = self.geerateCourseQuiz(course_id)
+        print(Content)
         return Response({'Content': Content})
 
 
@@ -421,3 +425,69 @@ class ConceptInAssessment_View(APIView):
                 t['selected'] = False
                 contents.append(t)
         return Response({"Content": contents})
+
+
+class Performance_View(APIView):
+
+    def post(self, request, format=None):
+        performance = request.data['performance']
+        enrollmentid = request.data['enrollment']
+        conceptid = request.data['concept']
+        concept = Concept.objects.filter(id=conceptid)[0]
+        enrollment = AssessmentEnrollment.objects.filter(id=enrollmentid)[0]
+        AsssessmentPerformance.objects.create(
+            performance=performance, concept=concept, assessmentEnrollment=enrollment)
+        return Response({'message': 'done'})
+
+    def get(self, request, format=None):
+        contents = []
+        if 'id' in request.query_params.keys():
+            id = request.query_params['id']
+            contents = AsssessmentPerformance.objects.filter(
+                assessmentEnrollment__id=id).values()
+        return Response({'Content': contents})
+
+    def put(self, request, format=None):
+        performance = request.data['performance']
+        id = request.data['id']
+        topic = Topic.objects.filter(
+            id=id).update(performance=performance)
+        return Response({'message': 'done'})
+
+    def delete(self, request, format=None):
+        id = request.query_params['id']
+        a = Topic.objects.get(id=id)
+        a.delete()
+        return Response({'message': 'done'})
+
+
+class AssessmentEnroll_View(APIView):
+    def post(self, request, format=None):
+        assessmentid = request.data['assessment']
+        courseid = request.data['course']
+        assessment = Assessment.objects.filter(id=assessmentid)[0]
+        enrollment = AssessmentEnrollment.objects.filter(id=enrollmentid)[0]
+        AsssessmentPerformance.objects.create(
+            performance=performance, concept=concept, assessmentEnrollment=enrollment)
+        return Response({'message': 'done'})
+
+    def get(self, request, format=None):
+        contents = []
+        if 'id' in request.query_params.keys():
+            id = request.query_params['id']
+            contents = AsssessmentPerformance.objects.filter(
+                assessmentEnrollment__id=id).values()
+        return Response({'Content': contents})
+
+    def put(self, request, format=None):
+        performance = request.data['performance']
+        id = request.data['id']
+        topic = Topic.objects.filter(
+            id=id).update(performance=performance)
+        return Response({'message': 'done'})
+
+    def delete(self, request, format=None):
+        id = request.query_params['id']
+        a = Topic.objects.get(id=id)
+        a.delete()
+        return Response({'message': 'done'})

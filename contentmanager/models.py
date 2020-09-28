@@ -1,5 +1,5 @@
 from django.db import models
-
+from profiles_api.models import UserProfile
 # Create your models here.
 
 
@@ -42,14 +42,40 @@ class Course(models.Model):
     def __str__(self):
         """String"""
         return self.description
-class ConceptInCourse(models.Model):
-    concept=models.ForeignKey(Concept,on_delete=models.CASCADE)
-    course=models.ForeignKey(Course,on_delete=models.CASCADE)
-class Assessment(models.Model):
-    name=models.CharField(max_length=100)
-    totalQuestions=models.IntegerField()
-    course=models.ForeignKey(Course,on_delete=models.CASCADE, default=1)
-class ConceptInAssessment(models.Model):
-    concept=models.ForeignKey(Concept,on_delete=models.CASCADE)
-    assessment=models.ForeignKey(Assessment,on_delete=models.CASCADE)
 
+
+class ConceptInCourse(models.Model):
+    concept = models.ForeignKey(Concept, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+
+class Assessment(models.Model):
+    name = models.CharField(max_length=100)
+    totalQuestions = models.IntegerField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, default=1)
+
+
+class ConceptInAssessment(models.Model):
+    concept = models.ForeignKey(Concept, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+
+
+class CourseEnrollment(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+
+class AssessmentEnrollment(models.Model):
+    courseEnrollment = models.ForeignKey(
+        CourseEnrollment, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+
+
+class AsssessmentPerformance(models.Model):
+    assessmentEnrollment = models.ForeignKey(
+        AssessmentEnrollment, on_delete=models.CASCADE)
+    concept = models.ForeignKey(Concept, on_delete=models.CASCADE)
+    performance = models.IntegerField()
+
+    class Meta:
+        ordering = ['-performance']
