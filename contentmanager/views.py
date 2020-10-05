@@ -11,6 +11,8 @@ from .models import AssessmentEnrollment
 from .models import AsssessmentPerformance
 from .models import CourseEnrollment
 from profiles_api.models import UserProfile
+
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 import os
 from importlib import import_module
 from django.forms.models import model_to_dict
@@ -56,7 +58,7 @@ class Topic_View(APIView):
 
     def post(self, request, format=None):
         name = request.data['name']
-        area_id = request.data['area_id']
+        area_id = request.data['area']
         area = Area.objects.filter(id=area_id)[0]
         topic = Topic.objects.filter(name=name)
         if topic.count() > 0:
@@ -328,7 +330,7 @@ class Quiz_View(APIView):
             Content = self.generate(concept_id)
         elif "ids" in request.query_params.keys():
             ids = request.query_params['ids']
-            ids = ids.split(",")[:-1]
+            ids = ids.split(",")
             allQuestions = []
             for concept_id in ids:
                 concept_id = int(concept_id)
@@ -536,9 +538,11 @@ class AssessmentEnroll_View(APIView):
             contents = AsssessmentPerformance.objects.filter(
                 assessmentEnrollment__id=id).values()
         elif 'userid' in request.query_params.keys():
-            user = UserProfile.objects.filter(id=1)[0]
+            user = UserProfile.objects.filter(id= request.query_params["userid"])[0]
             courseEnrollment = CourseEnrollment.objects.filter(user__id=user.id)[
                 0]
+            print(user)
+            print(courseEnrollment)
             assessmentEnrollment = AssessmentEnrollment.objects.filter(
                 courseEnrollment__id=courseEnrollment.id)[0]
             performances = AsssessmentPerformance.objects.filter(
@@ -574,6 +578,7 @@ class AssessmentEnroll_View(APIView):
 class CourseEnrollment_View(APIView):
     def post(self, request, format=None):
         course_id = request.data['course_id']
-        user = UserProfile.objects.filter(id=1)[0]
         course = Course.objects.filter(id=course_id)[0]
+        user= UserProfile.objects.filter(id=request.data['user_id'])[0]
         CourseEnrollment.objects.create(user=user, course=course)
+        return Response({'message':'done'})
