@@ -7,6 +7,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from profiles_api import models
+from profiles_api import serializers
 
 
 class Login(ObtainAuthToken):
@@ -24,9 +25,7 @@ class Logout(APIView):
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     """handle creating and and updating profiles"""
-    # serializer_class = serializers.UserProfileSerializer
+    serializer_class = serializers.UserProfileSerializer
     queryset = models.UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
     # permission_classes = (permissions.UpdateOwnProfile,)
-
-
