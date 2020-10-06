@@ -538,21 +538,23 @@ class AssessmentEnroll_View(APIView):
             contents = AsssessmentPerformance.objects.filter(
                 assessmentEnrollment__id=id).values()
         elif 'userid' in request.query_params.keys():
-            user = UserProfile.objects.filter(id= request.query_params["userid"])[0]
+            user = UserProfile.objects.filter(
+                id=request.query_params["userid"])[0]
             courseEnrollment = CourseEnrollment.objects.filter(user__id=user.id)[
                 0]
             print(user)
             print(courseEnrollment)
-            assessmentEnrollment = AssessmentEnrollment.objects.filter(
-                courseEnrollment__id=courseEnrollment.id)[0]
+            assessmentEnrollment = AssessmentEnrollment.objects.filter(courseEnrollment__id=courseEnrollment.id)[0]
+            print(assessmentEnrollment)
+
             performances = AsssessmentPerformance.objects.filter(
                 assessmentEnrollment__id=assessmentEnrollment.id)
             for content in performances:
                 newcontent = model_to_dict(content)
                 newcontent['concept_name'] = content.concept.name
-                newcontent['course']=courseEnrollment.course.id
+                newcontent['course'] = courseEnrollment.course.id
                 status = 'weak'
-                if content.performance > 80:
+                if content.performance > 74:
                     status = 'strong'
                 elif content.performance > 50:
                     status = 'average'
@@ -579,6 +581,10 @@ class CourseEnrollment_View(APIView):
     def post(self, request, format=None):
         course_id = request.data['course_id']
         course = Course.objects.filter(id=course_id)[0]
-        user= UserProfile.objects.filter(id=request.data['user_id'])[0]
+        user = UserProfile.objects.filter(id=request.data['user_id'])[0]
+        ce = CourseEnrollment.objects.filter(
+            course__id=course_id, user__id=user.id)
+        if ce.count() > 0:
+            ce.delete()
         CourseEnrollment.objects.create(user=user, course=course)
-        return Response({'message':'done'})
+        return Response({'message': 'done'})

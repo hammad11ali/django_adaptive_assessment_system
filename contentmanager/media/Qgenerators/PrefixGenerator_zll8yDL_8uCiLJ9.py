@@ -2,6 +2,7 @@ from . import QGenerator
 import random
 
 
+class PrefixGenerator(QGenerator.QBase):
     def __init__(self):
         super().__init__()
         self.facts = [('Name', 'Unit'), ('atto', '10^-18'),
