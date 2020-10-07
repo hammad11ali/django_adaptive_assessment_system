@@ -298,6 +298,7 @@ class Quiz_View(APIView):
     def generateAssessmentQuiz(self, aid):
         concepts = ConceptInAssessment.objects.filter(assessment__id=aid)
         Questions = []
+        k=0
         for cic in concepts:
             c = cic.concept
             file_ = os.path.basename(c.qgenerator.name)
@@ -306,6 +307,7 @@ class Quiz_View(APIView):
             QGenerator = import_module(
                 modulename, package='contentmanager.media.Qgenerators.')
             instance = QGenerator.getInstance()
+            
             for i in range(0, 4):
                 # Call Generate Question function
                 statement, optionsArray, correct = instance.generateQuestions()
@@ -317,9 +319,10 @@ class Quiz_View(APIView):
                     option = {'id': j, 'name': optionsArray[j],
                               'isAnswer': isAnswer, 'isSelected': False}
                     options.append(option)
-                Question = {'id': i, 'name': statement,
+                Question = {'id': i + (k*4), 'name': statement,
                             'options': options, 'concepts_id': c.id}
                 Questions.append(Question)
+            k=k+1
 
         return Questions
 
@@ -332,9 +335,13 @@ class Quiz_View(APIView):
             ids = request.query_params['ids']
             ids = ids.split(",")
             allQuestions = []
+            i=0
             for concept_id in ids:
                 concept_id = int(concept_id)
                 questions = self.generate(concept_id)
+                for j in range(0,len(questions)):
+                    questions[j]['id']=questions[j]['id'] + (i*4)
+                i=i+1
                 allQuestions.extend(questions)
             Content = allQuestions
         elif 'course_id' in request.query_params.keys():
@@ -516,7 +523,7 @@ class AssessmentEnroll_View(APIView):
         assessmentid = request.data['assessment']
         assessment = Assessment.objects.filter(id=assessmentid)[0]
         courseenrollment = CourseEnrollment.objects.filter(
-            course__id=assessment.course.id)[0]
+            course__id=assessment.course.id , user__id=request.data['userid'])[0]
         assessmentEnrollment = AssessmentEnrollment.objects.filter(
             courseEnrollment__id=courseenrollment.id)
         if assessmentEnrollment.count() > 0:
@@ -554,9 +561,9 @@ class AssessmentEnroll_View(APIView):
                 newcontent['concept_name'] = content.concept.name
                 newcontent['course'] = courseEnrollment.course.id
                 status = 'weak'
-                if content.performance > 74:
+                if content.performance >= 75:
                     status = 'strong'
-                elif content.performance > 50:
+                elif content.performance >= 50:
                     status = 'average'
                 newcontent['status'] = status
                 newcontent['assessmentenrollment'] = assessmentEnrollment.assessment.id
@@ -564,10 +571,12 @@ class AssessmentEnroll_View(APIView):
         return Response({'Content': contents})
 
     def put(self, request, format=None):
+        assessment_id = request.data['assessment']
+        assessmentenrollment=AssessmentEnrollment.objects.filter(assessment__id=assessment_id)[0]
         performance = request.data['performance']
-        id = request.data['id']
-        topic = Topic.objects.filter(
-            id=id).update(performance=performance)
+        p=AsssessmentPerformance.objects.filter(
+            assessmentEnrollment__id=assessmentenrollment.id, concept__id=request.data['concept']).update(performance=performance)
+        print(p)
         return Response({'message': 'done'})
 
     def delete(self, request, format=None):
