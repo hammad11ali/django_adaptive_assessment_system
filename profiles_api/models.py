@@ -60,4 +60,3 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         """String"""
         return self.email
-
