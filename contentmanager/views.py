@@ -260,7 +260,7 @@ class Quiz_View(APIView):
                 if j == correct:
                     isAnswer = True
                 option = {'id': j, 'name': optionsArray[j],
-                          'isAnswer': isAnswer, 'isSelected': False}
+                          'isAnswer': isAnswer, 'selected': False}
                 options.append(option)
             Question = {'id': i, 'name': statement,
                         'options': options, 'concepts_id': concept_id}
@@ -287,7 +287,7 @@ class Quiz_View(APIView):
                     if j == correct:
                         isAnswer = True
                     option = {'id': j, 'name': optionsArray[j],
-                              'isAnswer': isAnswer, 'isSelected': False}
+                              'isAnswer': isAnswer, 'selected': False}
                     options.append(option)
                 Question = {'id': i, 'name': statement,
                             'options': options, 'concepts_id': c.id}
@@ -317,7 +317,7 @@ class Quiz_View(APIView):
                     if j == correct:
                         isAnswer = True
                     option = {'id': j, 'name': optionsArray[j],
-                              'isAnswer': isAnswer, 'isSelected': False}
+                              'isAnswer': isAnswer, 'selected': False}
                     options.append(option)
                 Question = {'id': i + (k*4), 'name': statement,
                             'options': options, 'concepts_id': c.id}
