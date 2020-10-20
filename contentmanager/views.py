@@ -597,3 +597,8 @@ class CourseEnrollment_View(APIView):
             ce.delete()
         CourseEnrollment.objects.create(user=user, course=course)
         return Response({'message': 'done'})
+    def get(self, request, format=None):
+        user_id = request.query_params['id']
+        courseenrollment = CourseEnrollment.objects.filter(user__id=user_id).values()[0]
+        return Response({'Content': courseenrollment})
+
