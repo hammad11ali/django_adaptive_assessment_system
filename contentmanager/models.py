@@ -69,6 +69,7 @@ class AssessmentEnrollment(models.Model):
     courseEnrollment = models.ForeignKey(
         CourseEnrollment, on_delete=models.CASCADE)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    is_active = models.BooleanField()
 
 
 class AsssessmentPerformance(models.Model):
