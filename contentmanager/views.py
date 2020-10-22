@@ -243,6 +243,7 @@ class Course_View(APIView):
 
 class Quiz_View(APIView):
     def generate(self, concept_id):
+        print(concept_id)
         concept = Concept.objects.filter(id=concept_id).values()[0]
         file_ = os.path.basename(concept['qgenerator'])
         filename = os.path.splitext(file_)[0]
@@ -500,6 +501,8 @@ class Performance_View(APIView):
             enrollment = request.query_params['enrollment']
             performances = AsssessmentPerformance.objects.filter(
                 assessmentEnrollment__id=enrollment)
+            print(performances)
+            print('aasd')
             for content in performances:
                 newcontent = model_to_dict(content)
                 newcontent['concept_name'] = content.concept.name
@@ -515,10 +518,10 @@ class Performance_View(APIView):
 
     def put(self, request, format=None):
         performance = request.data['performance']
-        enrollment = request.data['enrollement']
+        enrollment = request.data['enrollment']
         concept_id = request.data['concept_id']
         AsssessmentPerformance.objects.filter(
-            assessmentEnrollment__id=id, concept__id=concept_id).update(performance=performance)
+            assessmentEnrollment__id=enrollment, concept__id=concept_id).update(performance=performance)
         return Response({'message': 'done'})
 
 
@@ -532,9 +535,9 @@ class AssessmentEnroll_View(APIView):
         assessmentEnrollment = AssessmentEnrollment.objects.filter(
             courseEnrollment__id=courseenrollment.id)
         if assessmentEnrollment.count() > 0:
-            assessmentEnrollment.update(is_active=false)
+            assessmentEnrollment.update(is_active=False)
         assessmentenrollment = AssessmentEnrollment.objects.create(
-            courseEnrollment=courseenrollment, assessment=assessment, is_active=true)
+            courseEnrollment=courseenrollment, assessment=assessment, is_active=True)
         results = request.data['array']
         for result in results:
             concept = Concept.objects.filter(id=result['concept_id'])[0]
@@ -548,9 +551,10 @@ class AssessmentEnroll_View(APIView):
         if 'user_id' in request.query_params.keys() and 'course_id' in request.query_params.keys():
             user_id = request.query_params['user_id']
             course_id = request.query_params['course_id']
-            allassessments = Assessment.objects.filter(course__id=course_id)
+            allassessments = Assessment.objects.filter(course__id=course_id).values()
+            ce=CourseEnrollment.objects.filter(course__id=course_id,user__id=user_id)[0]
             enrolledassessments = AssessmentEnrollment.objects.filter(
-                course__id=course_id, user__id=user_id)
+                courseEnrollment__id=ce.id,is_active=True ).values()
             return Response({'all': allassessments, 'enrolled': enrolledassessments})
         return Response({'message': 'invalid'})
         # if 'id' in request.query_params.keys():
