@@ -7,7 +7,7 @@ class AccelerationGenerator(QGenerator.QBase):
     def __init__(self):
         super().__init__()
 
-    def Acceleration(self):
+    def generateQuestions(self):
         question = ['', [], 0]
         choice = [1, 2, 3, 4, 5, 6, 7]
         index = random.choice(choice)
@@ -137,10 +137,8 @@ class AccelerationGenerator(QGenerator.QBase):
             option[indexvalue] = 'none of them'
             question = [q, option, correctIndex]
         return question
-
-    def generateQuestions(self):
-        return (self.Acceleration())
+        
 
 
 def getInstance():
-    return generateQuestions()
+    return AccelerationGenerator()

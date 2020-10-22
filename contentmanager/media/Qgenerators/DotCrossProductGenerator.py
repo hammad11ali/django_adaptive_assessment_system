@@ -1,4 +1,4 @@
-import QGenerator
+import random
 from . import QGenerator
 
 class DostCrossGenerator(QGenerator.QBase):

@@ -590,15 +590,14 @@ class AssessmentEnroll_View(APIView):
         #         contents.append(newcontent)
         # return Response({'Content': contents})
 
-    # def put(self, request, format=None):
-    #     assessment_id = request.data['assessment']
-    #     assessmentenrollment = AssessmentEnrollment.objects.filter(
-    #         assessment__id=assessment_id)[0]
-    #     performance = request.data['performance']
-    #     p = AsssessmentPerformance.objects.filter(
-    #         assessmentEnrollment__id=assessmentenrollment.id, concept__id=request.data['concept']).update(performance=performance)
-    #     print(p)
-    #     return Response({'message': 'done'})
+    def put(self, request, format=None):
+        assessment_id = request.data['assessment_id']
+        assessmentenrollment = AssessmentEnrollment.objects.filter(
+            assessment__id=assessment_id)[0]
+        p = AsssessmentPerformance.objects.filter(
+            assessmentEnrollment__id=assessmentenrollment.id, concept__id=request.data['concept']).update(is_active=False)
+        print(p)
+        return Response({'message': 'done'})
 
     # def delete(self, request, format=None):
     #     id = request.query_params['id']
