@@ -554,7 +554,7 @@ class AssessmentEnroll_View(APIView):
             allassessments = Assessment.objects.filter(course__id=course_id).values()
             ce=CourseEnrollment.objects.filter(course__id=course_id,user__id=user_id)[0]
             enrolledassessments = AssessmentEnrollment.objects.filter(
-                courseEnrollment__id=ce.id,is_active=True ).values()
+                courseEnrollment__id=ce.id ).values()
             return Response({'all': allassessments, 'enrolled': enrolledassessments})
         return Response({'message': 'invalid'})
         # if 'id' in request.query_params.keys():
@@ -593,10 +593,7 @@ class AssessmentEnroll_View(APIView):
     def put(self, request, format=None):
         assessment_id = request.data['assessment_id']
         assessmentenrollment = AssessmentEnrollment.objects.filter(
-            assessment__id=assessment_id)[0]
-        p = AsssessmentPerformance.objects.filter(
-            assessmentEnrollment__id=assessmentenrollment.id, concept__id=request.data['concept']).update(is_active=False)
-        print(p)
+            assessment__id=assessment_id).update(is_active=False)
         return Response({'message': 'done'})
 
     # def delete(self, request, format=None):
