@@ -211,6 +211,7 @@ class Course_View(APIView):
         if 'id' in request.query_params.keys():
             course_id = request.query_params['id']
             course = Course.objects.filter(id=course_id).values()[0]
+
         else:
             course = Course.objects.values()
         return Response({'Content': course})
@@ -630,3 +631,27 @@ class CourseEnrollment_View(APIView):
             user__id=user_id).values()
         courses = Course.objects.all().values()
         return Response({'enrollments': courseenrollment, 'courses': courses})
+
+class Progress_View(APIView):
+    def get(self, request, format=None):
+        contents = []
+        if 'user_id' in request.query_params.keys() and 'course_id' in request.query_params.keys():
+            user_id = request.query_params['user_id']
+            course_id = request.query_params['course_id']
+            ce = CourseEnrollment.objects.filter(
+                course__id=course_id, user__id=user_id)[0]
+            enrolledassessments = AssessmentEnrollment.objects.filter(
+                courseEnrollment__id=ce.id,is_open=True)[0].values()
+            enrollment = ce.id
+            performances = AsssessmentPerformance.objects.filter(
+                assessmentEnrollment__id=enrollment)
+            assessmentEnrollment = AssessmentEnrollment.objects.filter(
+                id=enrollment).values()[0]
+            for content in performances:
+                newcontent = model_to_dict(content)
+                newcontent['concept_name'] = content.concept.name
+                newcontent['concept_id'] = content.concept.id
+                newcontent['active'] = assessmentEnrollment['is_open']
+                contents.append(newcontent)
+
+        return Response({'Content': contents})

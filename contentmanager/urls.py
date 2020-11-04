@@ -12,4 +12,5 @@ urlpatterns = [
     path('courseEnrollment/', CourseEnrollment_View.as_view()),
     path('assessmentenrollment/', AssessmentEnroll_View.as_view()),
     path('performance/', Performance_View.as_view()),
+    path('progress/',Progress_View.as_view()),
 ]
