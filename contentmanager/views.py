@@ -639,19 +639,20 @@ class Progress_View(APIView):
             user_id = request.query_params['user_id']
             course_id = request.query_params['course_id']
             ce = CourseEnrollment.objects.filter(
-                course__id=course_id, user__id=user_id)[0]
+                course__id=course_id, user__id=user_id).values()[0]
+            # return Response({'a':ce['id']})
             enrolledassessments = AssessmentEnrollment.objects.filter(
-                courseEnrollment__id=ce.id,is_open=True)[0].values()
-            enrollment = ce.id
+                courseEnrollment__id=ce['id'],is_open=True).values()[0]
+            enrollment =enrolledassessments['id']
+            # assessmentEnrollment = AssessmentEnrollment.objects.filter(
+            #     id=enrollment).values()[0]
             performances = AsssessmentPerformance.objects.filter(
                 assessmentEnrollment__id=enrollment)
-            assessmentEnrollment = AssessmentEnrollment.objects.filter(
-                id=enrollment).values()[0]
+
             for content in performances:
                 newcontent = model_to_dict(content)
                 newcontent['concept_name'] = content.concept.name
                 newcontent['concept_id'] = content.concept.id
-                newcontent['active'] = assessmentEnrollment['is_open']
                 contents.append(newcontent)
 
         return Response({'Content': contents})
