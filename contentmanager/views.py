@@ -516,6 +516,8 @@ class Performance_View(APIView):
                     status = 'average'
                 newcontent['status'] = status
                 contents.append(newcontent)
+            
+
         return Response({'Content': contents})
 
     def put(self, request, format=None):
