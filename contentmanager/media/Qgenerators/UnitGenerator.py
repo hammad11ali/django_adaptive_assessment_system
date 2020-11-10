@@ -48,6 +48,5 @@ class UnitGenerator(QGenerator.QBase):
             return "nothing"
 
 
-
 def getInstance():
     return UnitGenerator()

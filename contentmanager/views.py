@@ -516,7 +516,7 @@ class Performance_View(APIView):
                     status = 'average'
                 newcontent['status'] = status
                 contents.append(newcontent)
-            
+            print(enrollment)
 
         return Response({'Content': contents})
 
@@ -534,6 +534,7 @@ class AssessmentEnroll_View(APIView):
         assessmentid = request.data['assessment_id']
         courseid = request.data['course_id']
         assessment = Assessment.objects.filter(id=assessmentid)[0]
+        print(request.data)
         courseenrollment = CourseEnrollment.objects.filter(
             course__id=courseid, user__id=request.data['user_id'])[0]
         assessmentEnrollment = AssessmentEnrollment.objects.filter(
