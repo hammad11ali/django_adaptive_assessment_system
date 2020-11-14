@@ -255,7 +255,7 @@ class Quiz_View(APIView):
         instance = QGenerator.getInstance()
         for i in range(0, 4):
             # Call Generate Question function
-            statement, optionsArray, correct = instance.generateQuestions()
+            statement, optionsArray, correct, detail = instance.generateQuestions()
             options = []
             for j in range(0, 4):
                 isAnswer = False
@@ -265,7 +265,7 @@ class Quiz_View(APIView):
                           'isAnswer': isAnswer, 'selected': False}
                 options.append(option)
             Question = {'id': i, 'name': statement,
-                        'options': options, 'concepts_id': concept_id}
+                        'options': options, 'detail': detail, 'concepts_id': concept_id}
             Questions.append(Question)
         return Questions
 
@@ -282,7 +282,7 @@ class Quiz_View(APIView):
             instance = QGenerator.getInstance()
             for i in range(0, 4):
                 # Call Generate Question function
-                statement, optionsArray, correct = instance.generateQuestions()
+                statement, optionsArray, correct, detail = instance.generateQuestions()
                 options = []
                 for j in range(0, 4):
                     isAnswer = False
@@ -292,7 +292,7 @@ class Quiz_View(APIView):
                               'isAnswer': isAnswer, 'selected': False}
                     options.append(option)
                 Question = {'id': i, 'name': statement,
-                            'options': options, 'concepts_id': c.id}
+                            'options': options, 'detail': detail, 'concepts_id': c.id}
                 Questions.append(Question)
 
         return Questions
@@ -312,7 +312,7 @@ class Quiz_View(APIView):
 
             for i in range(0, 4):
                 # Call Generate Question function
-                statement, optionsArray, correct = instance.generateQuestions()
+                statement, optionsArray, correct, detail = instance.generateQuestions()
                 options = []
                 for j in range(0, 4):
                     isAnswer = False
@@ -322,7 +322,7 @@ class Quiz_View(APIView):
                               'isAnswer': isAnswer, 'selected': False}
                     options.append(option)
                 Question = {'id': i + (k*4), 'name': statement,
-                            'options': options, 'concepts_id': c.id}
+                            'options': options, 'detail': detail, 'concepts_id': c.id}
                 Questions.append(Question)
             k = k+1
 
@@ -635,6 +635,7 @@ class CourseEnrollment_View(APIView):
         courses = Course.objects.all().values()
         return Response({'enrollments': courseenrollment, 'courses': courses})
 
+
 class Progress_View(APIView):
     def get(self, request, format=None):
         contents = []
@@ -645,8 +646,8 @@ class Progress_View(APIView):
                 course__id=course_id, user__id=user_id).values()[0]
             # return Response({'a':ce['id']})
             enrolledassessments = AssessmentEnrollment.objects.filter(
-                courseEnrollment__id=ce['id'],is_open=True).values()[0]
-            enrollment =enrolledassessments['id']
+                courseEnrollment__id=ce['id'], is_open=True).values()[0]
+            enrollment = enrolledassessments['id']
             # assessmentEnrollment = AssessmentEnrollment.objects.filter(
             #     id=enrollment).values()[0]
             performances = AsssessmentPerformance.objects.filter(
