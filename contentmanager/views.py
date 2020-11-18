@@ -312,7 +312,7 @@ class Quiz_View(APIView):
 
             for i in range(0, 4):
                 # Call Generate Question function
-                statement, optionsArray, correct, detail = instance.generateQuestions()
+                statement, optionsArray, correct,detail = instance.generateQuestions()
                 options = []
                 for j in range(0, 4):
                     isAnswer = False

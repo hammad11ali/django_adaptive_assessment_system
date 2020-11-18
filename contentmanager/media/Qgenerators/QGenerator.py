@@ -5,7 +5,7 @@ class QBase:
     def printName(self):
         print(self.name)
     def isOf(self,fact,relation,incorrect):
-        question=("",[], 0)
+        question=("",[], 0,detail)
         gIndex=random.choice([0,1])
         if gIndex==0:
             given=fact[0]
@@ -21,7 +21,8 @@ class QBase:
                 selected=random.choice(choices)
                 ansList[selected]=incorrect[i][1]
                 choices.remove(selected)
-            question=(q,ansList,correctIndex)
+            detail="It is basic information"
+            question=(q,ansList,correctIndex,detail)
         elif gIndex==1:
             given=fact[1]
             ans=fact[0]
@@ -36,7 +37,8 @@ class QBase:
                 selected=random.choice(choices)
                 ansList[selected]=incorrect[i][0]
                 choices.remove(selected)
-            question=(q,ansList,correctIndex)
+            detail="It is basic information"
+            question=(q,ansList,correctIndex,detail)
         return question
     def whichIs(self,fact,relation,incorrect):
         question=("",[], 0)
@@ -52,7 +54,8 @@ class QBase:
             selected=random.choice(choices)
             ansList[selected]=incorrect[i][0]
             choices.remove(selected)
-        question=(q,ansList,correctIndex)
+        detail="It is basic information"
+        question=(q,ansList,correctIndex,detail)
         return question
     def whatIs(self,fact,relation,incorrect):
         question=("",[], 0)
@@ -68,7 +71,8 @@ class QBase:
             selected=random.choice(choices)
             ansList[selected]=incorrect[i][0]
             choices.remove(selected)
-        question=(q,ansList,correctIndex)
+        detail="It is basic information"
+        question=(q,ansList,correctIndex,detail)
         return question
     
     def simple(self,fact,incorrect):
@@ -85,7 +89,8 @@ class QBase:
             selected=random.choice(choices)
             ansList[selected]=incorrect[i][0]
             choices.remove(selected)
-        question=(q,ansList,correctIndex)
+        detail="It is basic information"
+        question=(q,ansList,correctIndex,detail)
         return question
     
     def How(self,fact,incorrect):
@@ -102,5 +107,6 @@ class QBase:
             selected=random.choice(choices)
             ansList[selected]=incorrect[i][0]
             choices.remove(selected)
-        question=(q,ansList,correctIndex)
+        detail="It is basic information"
+        question=(q,ansList,correctIndex,detail)
         return question
