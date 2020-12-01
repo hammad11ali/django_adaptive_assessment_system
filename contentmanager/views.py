@@ -639,7 +639,21 @@ class CourseEnrollment_View(APIView):
 class Progress_View(APIView):
     def get(self, request, format=None):
         contents = []
-        if 'user_id' in request.query_params.keys() and 'course_id' in request.query_params.keys():
+        if 'user_id' in request.query_params.keys():
+            user_id=request.query_params['user_id']
+            ce = CourseEnrollment.objects.filter(user__id=user_id).values()
+            print(ce)
+            for c in ce:
+                print(c['id'])
+                allassessments= Assessment.objects.filter(
+                course__id=c['course_id']).count()
+                ce = CourseEnrollment.objects.filter(
+                course__id=c['course_id'], user__id=user_id)[0]
+                enrolledassessments = AssessmentEnrollment.objects.filter(
+                courseEnrollment__id=ce.id).count()
+                course=Course.objects.filter(id=c['course_id']).values()[0]
+                contents.append({"CourseName":course['name'],"id":c['course_id'],"total":allassessments,"enrolled":enrolledassessments})
+        elif 'user_id' in request.query_params.keys() and 'course_id' in request.query_params.keys():
             user_id = request.query_params['user_id']
             course_id = request.query_params['course_id']
             ce = CourseEnrollment.objects.filter(
@@ -658,5 +672,6 @@ class Progress_View(APIView):
                 newcontent['concept_name'] = content.concept.name
                 newcontent['concept_id'] = content.concept.id
                 contents.append(newcontent)
-
+           
+        print(contents)
         return Response({'Content': contents})
