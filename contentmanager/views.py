@@ -471,16 +471,22 @@ class ConceptInAssessment_View(APIView):
             assessment_id = request.query_params['id']
             print(assessment_id)
             concepts = Concept.objects.all()
+            assessment = Assessment.objects.filter(id=assessment_id)[0]
+            course_id = assessment.course.id
             for concept in concepts:
                 content = model_to_dict(concept)
                 content.pop("qgenerator")
-                conceptsincourse = ConceptInAssessment.objects.filter(
-                    assessment__id=assessment_id, concept__id=concept.id)
+                conceptsincourse = ConceptInCourse.objects.filter(
+                    course__id=course_id, concept__id=concept.id)
                 if conceptsincourse.count() > 0:
-                    content['selected'] = True
-                else:
-                    content['selected'] = False
-                contents.append(content)
+                    conceptsinassessment = ConceptInAssessment.objects.filter(
+                        assessment__id=assessment_id, concept__id=concept.id)
+                    if conceptsinassessment.count() > 0:
+                        content['selected'] = True
+                    else:
+                        content['selected'] = False
+
+                    contents.append(content)
         else:
             concepts = Concept.objects.all()
             for concept in concepts:
@@ -677,3 +683,4 @@ class Progress_View(APIView):
 
         print(contents)
         return Response({'Content': contents})
+
