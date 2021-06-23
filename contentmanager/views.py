@@ -85,7 +85,7 @@ class Topic_View(APIView):
     def put(self, request, format=None):
         name = request.data['name']
         id = request.data['id']
-        area_id = request.data['area_id']
+        area_id = request.data['area']
         area = Area.objects.filter(id=area_id)[0]
         topic = Topic.objects.filter(name=name)
         if topic.count() > 0:
@@ -226,9 +226,11 @@ class Course_View(APIView):
             thumbnail = course.thumbnail
         concepts_id = request.data['ids']
         concepts_id = concepts_id.split(',')
-        course.delete()
-        course = Course.objects.create(
+        # course.delete()
+        ConceptInCourse.objects.filter(course=course).delete()
+        course = Course.objects.filter(id=id).update(
             name=name, description=description, thumbnail=thumbnail)
+        course = Course.objects.filter(id=id)[0]
         for concept_id in concepts_id:
             concept = Concept.objects.filter(id=concept_id)[0]
             ConceptInCourse.objects.create(concept=concept, course=course)
@@ -683,4 +685,3 @@ class Progress_View(APIView):
 
         print(contents)
         return Response({'Content': contents})
-
