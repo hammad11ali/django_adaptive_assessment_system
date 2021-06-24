@@ -42,7 +42,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         upload_to='photos/', height_field=None, width_field=None, max_length=None)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    is_enabled=models.BooleanField(default=True)
+    is_enabled = models.BooleanField(default=False)
 
     # password
     objects = UserProfileManager()
@@ -62,7 +62,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
         """String"""
         return self.email
 
+
 class EmailToken(models.Model):
     token = models.CharField(max_length=255)
-    user=models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     usetype = models.CharField(max_length=255)

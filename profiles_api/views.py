@@ -35,7 +35,7 @@ class EmailConfirmation(APIView):
             t = uuid.uuid3(uuid.NAMESPACE_DNS, 'user'+str(user.id) +
                            user.email+str(datetime.datetime.now().timestamp()))
             send_mail('Confirm Email', 'Your account for Kamyab Learning System Has been successfully created. Please open this link to confirm your email  http://127.0.0.1:8000/api/email/?token=' +
-                      str(t), 'hammad22ali@gmail.com', ['hammad11ali@gmail.com'])
+                      str(t), 'hammad22ali@gmail.com', [user.email])
             models.EmailToken.objects.create(
                 user=user, token=t, usetype='emailconfirm')
             return Response({'message': 'ok'})
